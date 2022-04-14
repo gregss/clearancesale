@@ -1,0 +1,67 @@
+version: '3.4'
+
+networks:
+  backend:
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: app.dockerfile
+    depends_on:
+      - creator
+    restart: on-failure
+    ports:
+      - "8081:8081"
+    expose:
+      - 8081
+    environment:
+      DB_URI: "postgres://postgres:postgres@postgres:5432/postgres"
+      RABBIT_URI: "amqp://guest:guest@rabbit:5672/"
+  server:
+    build:
+      context: .
+      dockerfile: server.dockerfile
+    depends_on:
+      - creator
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    expose:
+      - 8080
+    environment:
+      DB_URI: "postgres://postgres:postgres@postgres:5432/postgres"
+      RABBIT_URI: "amqp://guest:guest@rabbit:5672/"
+  creator:
+    build:
+      context: .
+      dockerfile: creator.dockerfile
+    depends_on:
+      - postgres
+      - rabbit
+    restart: on-failure
+    environment:
+      DB_URI: "postgres://postgres:postgres@postgres:5432/postgres"
+      RABBIT_URI: "amqp://guest:guest@rabbit:5672/"
+
+  postgres:
+    image: postgres
+    restart: always
+    volumes:
+      #- ./.docker/pgdata:/var/lib/postgresql/data # todo
+      - ./migrations/init.up.sql:/docker-entrypoint-initdb.d/init.up.sql
+    environment:
+      POSTGRES_PASSWORD: postgres # вынести
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - '5432:5432'
+
+  rabbit:
+    image: rabbitmq:3-management
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+      - '15671:15671'
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest

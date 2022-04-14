@@ -1,0 +1,1 @@
+DROP TABLE sale, sale_product, sell

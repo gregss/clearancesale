@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package ui.v1;
+
+option go_package = "./;saleuiv1";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service SaleService {
+  rpc Create (CreateRequest) returns (google.protobuf.Empty) {}
+  rpc CreateProducts (CreateProductsRequest) returns (google.protobuf.Empty) {}
+}
+
+// создать распродажу
+message CreateRequest {
+  string name = 1;
+  google.protobuf.Timestamp start_date = 2;
+  google.protobuf.Timestamp end_date = 3;
+  uint32 stop_factor = 4;
+  uint32 contractor_type = 5;
+  uint32 type = 6;
+}
+
+// заполнить распродажу
+message CreateProductsRequest {
+  message SaleProducts {
+    string nomenclature_uuid = 1;
+    uint32 price = 2;
+    uint32 max_count = 3;
+    uint32 max_order_count = 4;
+    uint32 type = 5;
+    bool is_feed = 6;
+  }
+
+  uint32 sale_id = 1;
+  repeated uint32 region_id = 2;
+  repeated SaleProducts sale_products = 3;
+}

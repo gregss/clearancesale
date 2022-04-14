@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package public.v1;
+
+option go_package = "./;salev1";
+
+import "google/protobuf/empty.proto";
+
+service SellingService {
+  rpc Sell (SellRequest) returns (google.protobuf.Empty) {} // выполнение продажи
+  rpc Rest (RestRequest) returns (RestResponse) {} // проверка возможности выполнения продажи
+}
+
+// запрос на фиксацию факта продажи(либо высвобождения) по распродажной цене товара
+message SellRequest {
+  message Sell {
+    string nomenclature_uuid = 1; //номенклатура
+    uint32 quantity = 2; // количество (может быть отрицательным)
+    string order_uuid = 3; // заказ
+  }
+
+  repeated Sell sell = 1;
+}
+
+// todo запрос на доступную распродажу (всегда только одна).
+message RestRequest {
+  message Rest {
+    string nomenclature_uuid = 1; //номенклатура
+    uint32 region_id = 2;
+    string order_uuid = 3; // заказ
+  }
+
+  repeated Rest rest = 1;
+}
+
+message RestResponse {
+  message Rest {
+    message Sale {
+      uint32 sale_id = 1;
+      string sale_name = 2;
+      uint32 quantity = 3;
+      uint32 price = 4;
+    }
+    string nomenclature_uuid = 1;
+    Sale sale = 3;
+  }
+  repeated Rest rest = 1;
+}
